@@ -1,11 +1,13 @@
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fast_market/firebase_options.dart';
+import 'package:fast_market/go_router_provider.dart';
 import 'package:fast_market/home/cart_screen.dart';
 import 'package:fast_market/home/product_add_screen.dart';
 import 'package:fast_market/home/home_screen.dart';
 import 'package:fast_market/home/product_detail_screen.dart';
 import 'package:fast_market/login/login_screen.dart';
+import 'package:fast_market/login/provider/login_provider.dart';
 import 'package:fast_market/login/sign_up_screen.dart';
 import 'package:fast_market/model/product.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -39,51 +41,24 @@ void main() async {
   ));
 }
 
-class FastMarket extends StatelessWidget {
+class FastMarket extends ConsumerWidget {
   FastMarket({super.key});
-  final router = GoRouter(
-    initialLocation: '/login',
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => HomeScreen(),
-        routes: [
-          GoRoute(
-            path: 'cart/:uid',
-            builder: (context, state) => CartScreen(uid: state.pathParameters['uid'] ?? ''),
-          ),
-          GoRoute(
-            path: 'product',
-            builder: (context, state) {
-              return ProductDetailScreen(product: state.extra as Product);
-            },
-          ),
-          GoRoute(
-            path: 'product/add',
-            builder: (context, state) => ProductDetailScreen(product: state.extra as Product),
-          )
-        ],
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => LoginScreen(),
-      ),
-      GoRoute(
-        path: '/sign_up',
-        builder: (context, state) => SignUpScreen(),
-      )
-    ],
-  );
+
   // This widget is the root of your application.P
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // FirebaseAuth.instance.authStateChanges().listen(
+    //   (event) {
+    //  ref.read(userCredentialProvider.notifier).changeState(event);
+    //   },
+    // );
     return MaterialApp.router(
       title: '패캠마트',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      routerConfig: router,
+      routerConfig: ref.watch(routerProvider),
     );
   }
 }

@@ -6,14 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController emailTextController = TextEditingController();
   TextEditingController pwdTextController = TextEditingController();
@@ -21,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<UserCredential?> signIn(String email, String password) async {
     try {
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+
       print(credential);
       // userCredential = credential;
       return credential;
@@ -138,8 +139,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   return;
                                 }
                                 //로그인 성공
-                                ref.read(userCredentialProvider.notifier).changeState(result);
-                                if (context.mounted) context.go('/');
+                                // ref.read(userCredentialProvider.notifier).changeState(result!.user);
+                                // if (context.mounted) context.go('/');
                               }
                             },
                             child: const Text(
@@ -171,6 +172,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           }
                         },
                         child: Image.asset('assets/images/btn_google_signin.png'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          FirebaseAuth.instance.signOut();
+                        },
+                        child: Text('로그아웃'),
                       ),
                     ],
                   ),

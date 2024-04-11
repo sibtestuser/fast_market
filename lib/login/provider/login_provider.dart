@@ -1,18 +1,28 @@
-import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final userCredentialProvider = NotifierProvider<UserCredentialNotifier, UserCredential?>(UserCredentialNotifier.new);
+final authProvider = StreamProvider((ref) {
+  // return FirebaseAuth.instance.authStateChanges().listen((event) {
+  //   ref.read(userCredentialProvider.notifier).changeState(event);
+  // });
+  return FirebaseAuth.instance.authStateChanges();
+});
 
-class UserCredentialNotifier extends Notifier<UserCredential?> {
+final userCredentialProvider = NotifierProvider<UserCredentialNotifier, User?>(UserCredentialNotifier.new);
+
+class UserCredentialNotifier extends Notifier<User?> {
   @override
-  UserCredential? build() {
+  User? build() {
     // TODO: implement build
     return null;
   }
 
-  void changeState(UserCredential? newState) {
+  void changeState(User? newState) {
     state = newState;
   }
 }
+
+// final currentUserProvider = StreamProvider((ref) {
+//   final auth = ref.watch(userCredentialProvider);
+// });
+

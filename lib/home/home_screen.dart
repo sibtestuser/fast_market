@@ -4,6 +4,7 @@ import 'package:fast_market/home/%20widget/seller_widget.dart';
 import 'package:fast_market/home/product_add_screen.dart';
 import 'package:fast_market/login/provider/login_provider.dart';
 import 'package:fast_market/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,7 +33,9 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(CupertinoIcons.search),
             ),
           IconButton(
-            onPressed: () {},
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+            },
             icon: const Icon(Icons.logout_outlined),
           ),
         ],
@@ -49,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return switch (_menu_index) {
           0 => FloatingActionButton(
               onPressed: () {
-                final uid = user?.user?.uid;
+                final uid = user?.uid;
                 // Navigator.of(context).push(MaterialPageRoute(builder: (context) => CartScreen(uid: '')));
                 if (uid == null) {
                   return;
