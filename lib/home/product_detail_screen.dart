@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fast_market/login/provider/login_provider.dart';
 import 'package:fast_market/main.dart';
 import 'package:fast_market/model/product.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -75,6 +77,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       onTap: () {
                                         int reviewScore = 0;
                                         showDialog(
+                                          barrierDismissible: false,
                                           context: context,
                                           builder: (context) {
                                             TextEditingController reviewTEC = TextEditingController();
@@ -112,10 +115,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                     },
                                                     child: Text('취소'),
                                                   ),
-                                                  TextButton(
-                                                    onPressed: () {},
-                                                    child: Text('리뷰등록'),
-                                                  ),
+                                                  Consumer(builder: (context, ref, child) {
+                                                    final user = ref.read(userCredentialProvider);
+                                                    return TextButton(
+                                                      onPressed: () async {
+                                                        if (reviewTEC.text.isNotEmpty)
+                                                          await FirebaseFirestore.instance
+                                                              .collection('product')
+                                                              .doc('${widget.product.docID}')
+                                                              .collection('reviews')
+                                                              .add(
+                                                            {
+                                                              'uid': user?.uid ?? '',
+                                                              'email': user?.email ?? '',
+                                                              'review': reviewTEC.text.trim(),
+                                                              'timestamp': Timestamp.now(),
+                                                              'score': reviewScore + 1,
+                                                            },
+                                                          );
+                                                        if (context.mounted) Navigator.of(context).pop();
+                                                      },
+                                                      child: Text('리뷰등록'),
+                                                    );
+                                                  }),
                                                 ],
                                               );
                                             });
@@ -165,7 +187,33 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             child: TabBarView(
                               children: [
                                 Container(child: Text('제품 상세')),
-                                Container(child: Text('리뷰')),
+                                StreamBuilder(
+                                    stream: FirebaseFirestore.instance
+                                        .collection('product')
+                                        .doc('${widget.product.docID}')
+                                        .collection('reviews')
+                                        .snapshots(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        final items = snapshot.data?.docs ?? [];
+                                        return ListView.separated(
+                                            itemBuilder: ((context, index) {
+                                              return ListTile(
+                                                title: Text(
+                                                  '${items[index].data()['review']}',
+                                                ),
+                                              );
+                                            }),
+                                            separatorBuilder: (context, index) {
+                                              return Divider();
+                                            },
+                                            itemCount: items.length);
+                                      } else {
+                                        return Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
+                                    }),
                               ],
                             ),
                           ),
